@@ -3,9 +3,11 @@ import re,time,threading,os.path,sys
 import urllib.request as urllib2
 from bs4 import BeautifulSoup
 from math import sqrt,floor
+
 start_time = time.time()
 artist_url={}
 lock = threading.Lock()
+
 hdr = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
        'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
@@ -39,11 +41,13 @@ def getSongList(artist,artist_url):
         print("Removed old {} lyrics file".format(artist))
     global hdr,total
     links={}
+    
     req = urllib2.Request(artist_url,headers=hdr)
     page = urllib2.urlopen(req)
     soup = BeautifulSoup(page,"lxml")
     soup = soup.find('table',{"class":'tracklist'})
     soup = soup.findAll('a')
+    
     for i,song in enumerate(soup):
         links[i]=[song['title'],song['href']]
     numlinks=len(links)
