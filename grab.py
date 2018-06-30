@@ -1,10 +1,8 @@
 from __future__ import print_function
-import urllib2,re,time,threading,os.path
+import re,time,threading,os.path,sys
+import urllib.request as urllib2
 from bs4 import BeautifulSoup
 from math import sqrt,floor
-import sys
-reload(sys)
-sys.setdefaultencoding('UTF8')
 start_time = time.time()
 artist_url={}
 lock = threading.Lock()
@@ -21,7 +19,7 @@ threads,total,count,failed = [],0,1,0
 def getArtistUrls():
     artist_url,url={},{}
     if len(sys.argv)<2:
-        url=raw_input("\nPlease enter Songlyric artist urls seperated by space: ").split()
+        url=input("\nPlease enter Songlyric artist urls seperated by space: ").split()
     else:
         url=sys.argv[1:]
     for x in url:
@@ -62,6 +60,7 @@ def getSongList(artist,artist_url):
         print("\n{} threads are created for {} with each handling {} song(s) except the last one which is handeling {} song(s)\n".format(root+1,artist,root,numlinks-root**2))
     else:
         print("\n{} threads are created for {} with each handling {} song(s)\n".format(root,artist,root))
+
 def getLyrics(artist,start_index,stop_index,links):
     global hdr,failed
     shr={}
@@ -79,18 +78,21 @@ def getLyrics(artist,start_index,stop_index,links):
         lyric=str(soup.find('p',{'id':'songLyricsDiv'}))
         lyric=re.sub(r'''<p.*">|<br/>|</p>|(\(.*\))''','',lyric)
 
-        lyric=re.sub(r'''\n{1,40}''',' ',lyric)
+        #lyric=re.sub(r'''\n{1,40}''',' ',lyric)
 
         # Uncomment the above line and
         # comment below line if you are using this to obtain data for your markov chain
 
-        # lyric="\n"+song+":\n"+lyric
+        lyric="\n"+song+":\n"+lyric
         write_up(artist,lyric,song)
 
 def write_up(artist,lyric,song):
     global total,count,failed
     lock.acquire()
-    text_file = open(artist+".txt", "a")
+    try:
+        text_file = open(artist+".txt", "a")
+    except e:
+        print("Please re check the url and enter only artist url")
     text_file.write(lyric)
     text_file.close()
     print("Grabbed[{}/{}] : {}".format(count,total,song))
